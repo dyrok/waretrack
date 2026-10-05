@@ -1,10 +1,13 @@
 node_modules/
-.env
-.env.local
 client/node_modules/
 client/dist/
-.DS_Store
-.commandcode/
 
+# Secrets. .env.example is the template and is meant to be committed.
+.env*
+!.env.example
 # Firebase service-account keys are secrets — never commit them
 *firebase-adminsdk*.json
+
+.vercel
+.DS_Store
+.commandcode/
