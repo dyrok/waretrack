@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.local
+client/node_modules/
+client/dist/
+.DS_Store
+.commandcode/
+
+# Firebase service-account keys are secrets — never commit them
+*firebase-adminsdk*.json
