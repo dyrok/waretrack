@@ -35,6 +35,20 @@ notifications and team management for managers.
 
 Demo users, password `password123`: `maya@waretrack.dev` (manager) and `sam@waretrack.dev` (staff).
 
+## Signing in with Google
+
+The console shows a **Continue with Google** button when the four `VITE_FIREBASE_*` variables
+are set at build time; without them it renders nothing and email sign-in still works.
+
+Firebase shows the popup, the browser receives a Firebase ID token, and the console posts it to
+`POST /api/auth/firebase`. The server verifies the token with `firebase-admin` and answers with a
+WareTrack JWT, so every protected route keeps checking exactly one kind of token and Firebase is
+only the identity provider. A first-time Google user is created as **staff**.
+
+See [docs/firebase-setup.md](docs/firebase-setup.md) for where each value comes from, which hosts
+must be on the Firebase authorized-domains list, and why Vercel needs
+`FIREBASE_SERVICE_ACCOUNT` instead of `GOOGLE_APPLICATION_CREDENTIALS`.
+
 ## Scripts
 
 | Command        | What it does                                                      |

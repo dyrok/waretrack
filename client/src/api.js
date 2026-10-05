@@ -34,3 +34,6 @@ export const del = (path) => call("DELETE", path);
 
 export const login = (email, password) => call("POST", "/api/auth/login", { email, password });
 export const register = (fields) => call("POST", "/api/auth/register", fields);
+// Trades a Google ID token for one of our JWTs. The server verifies the token
+// with firebase-admin, then finds or creates the matching user.
+export const firebaseLogin = (idToken) => call("POST", "/api/auth/firebase", { idToken });

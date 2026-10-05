@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { login, register } from "../api.js";
+import { firebaseLogin, login, register } from "../api.js";
+import { firebaseEnabled, signInWithGoogle } from "../firebase.js";
 import { ErrorMessage, Field } from "./form.jsx";
 
 // J1/J2: sign in or sign up. The first account ever becomes manager,
@@ -22,6 +23,25 @@ export default function AuthScreen({ onSignedIn }) {
       onSignedIn(body);
     } catch (err) {
       setError(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Google sign-in. Firebase proves who the person is, then the server
+  // swaps that proof for one of our own tokens, so every protected route
+  // keeps checking exactly one kind of token.
+  const google = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const idToken = await signInWithGoogle();
+      onSignedIn(await firebaseLogin(idToken));
+    } catch (err) {
+      // Closing the popup is not an error worth showing.
+      if (err.code !== "auth/popup-closed-by-user" && err.code !== "auth/cancelled-popup-request") {
+        setError(err);
+      }
     } finally {
       setBusy(false);
     }
@@ -65,6 +85,14 @@ export default function AuthScreen({ onSignedIn }) {
         <button type="submit" disabled={busy}>
           {mode === "login" ? "Sign in" : "Create account"}
         </button>
+        {firebaseEnabled ? (
+          <>
+            <p className="auth-divider">or</p>
+            <button type="button" className="ghost google" onClick={google} disabled={busy}>
+              Continue with Google
+            </button>
+          </>
+        ) : null}
         <button
           type="button"
           className="ghost"

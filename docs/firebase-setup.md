@@ -79,6 +79,40 @@ Google Cloud / Cloud Run without a file) and `PUSH_DRIVER=log` needs no Firebase
 (Render dashboard → Environment → Secret Files) and point `GOOGLE_APPLICATION_CREDENTIALS`
 at its mount path (e.g. `/etc/secrets/waretrack-fcm.json`).
 
+## 4b. Google sign-in in the React console
+
+The console has a **Continue with Google** button. It renders only when the four
+`VITE_FIREBASE_*` variables from step 2 are present at **build** time, so a build without
+them silently falls back to email and password.
+
+The flow: Firebase shows the Google popup, the browser gets a Firebase **ID token**, the
+console posts it to `POST /api/auth/firebase`, the server verifies it with `firebase-admin`
+and returns a WareTrack JWT. Every protected route still checks only the WareTrack token,
+so Firebase is the identity provider and never the session.
+
+A new Google user is created with the **staff** role. Promote them from the Team screen as a
+manager.
+
+Two things break the popup if you skip them:
+
+1. **Authentication → Sign-in method → Google** must be enabled.
+2. **Authentication → Settings → Authorized domains** must list every host the console is
+   served from, including the deployed one (e.g. `waretrack-iota.vercel.app`). `localhost`
+   is there by default.
+
+## 4c. On Vercel: the key goes in an env var, not a file
+
+Vercel has no persistent disk, so `GOOGLE_APPLICATION_CREDENTIALS` (a *path*) cannot work.
+Put the whole service-account JSON into `FIREBASE_SERVICE_ACCOUNT` instead — `app.js` prefers
+it when present and calls `cert(JSON.parse(...))`:
+
+```bash
+vercel env add FIREBASE_SERVICE_ACCOUNT production < ~/.firebase/waretrack-adminsdk.json
+```
+
+The `VITE_FIREBASE_*` variables are read during the build, so after changing any of them you
+must **redeploy** — editing them alone does not update the already-built bundle.
+
 ## 5. Cloud Messaging (push)
 
 FCM is enabled by default for new projects — no extra env vars. Only the service account

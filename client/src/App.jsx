@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { setToken } from "./api.js";
+import { signOutOfGoogle } from "./firebase.js";
 import AuthScreen from "./components/AuthScreen.jsx";
 import AlertsView from "./views/AlertsView.jsx";
 import BinsView from "./views/BinsView.jsx";
@@ -69,6 +70,9 @@ export default function App() {
 
   // J3: sign out drops the token, closes the socket and returns to sign-in.
   const signOut = () => {
+    // Also end the Firebase session, or the next Google popup silently
+    // reuses the account that just signed out.
+    signOutOfGoogle();
     socket.current?.close();
     socket.current = null;
     setToken(null);

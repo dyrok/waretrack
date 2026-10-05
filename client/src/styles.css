@@ -349,3 +349,14 @@ main > * {
     transition: none !important;
   }
 }
+
+/* Google sign-in */
+.auth-divider {
+  text-align: center;
+  color: #8a8f98;
+  font-size: 0.85rem;
+  margin: 0;
+}
+button.ghost.google {
+  font-weight: 600;
+}

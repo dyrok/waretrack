@@ -18,9 +18,19 @@ const notificationRoutes = require("./routes/notificationRoutes");
 // Checks a Firebase ID token with firebase-admin.
 // Loaded only when someone actually uses Firebase login.
 const verifyWithFirebase = async (idToken) => {
-  const { initializeApp, applicationDefault, getApps } = require("firebase-admin/app");
+  const { initializeApp, applicationDefault, cert, getApps } = require("firebase-admin/app");
   const { getAuth } = require("firebase-admin/auth");
-  if (getApps().length === 0) initializeApp({ credential: applicationDefault() });
+  if (getApps().length === 0) {
+    // Two ways to give firebase-admin its key.
+    // FIREBASE_SERVICE_ACCOUNT holds the whole service-account JSON as one
+    // string, for hosts where we cannot put a file on disk (Vercel).
+    // Otherwise applicationDefault() reads the file named by
+    // GOOGLE_APPLICATION_CREDENTIALS, which is what you use locally.
+    const inlineKey = process.env.FIREBASE_SERVICE_ACCOUNT;
+    initializeApp({
+      credential: inlineKey ? cert(JSON.parse(inlineKey)) : applicationDefault(),
+    });
+  }
   return getAuth().verifyIdToken(idToken);
 };
 
